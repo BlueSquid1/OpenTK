@@ -9,7 +9,8 @@ using OpenTK.Input; //for keyboard input
 using OpenTK.Graphics.OpenGL; //for rendering
 using System.Drawing; //for colours
 
-namespace project1_frames
+
+namespace Project3_zooming
 {
     public class Game : IDisposable
     {
@@ -44,6 +45,9 @@ namespace project1_frames
         //setup GL
         public bool InitGL()
         {
+            //setup viewport
+            GL.Viewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+
             //initalize projection matrix
             GL.MatrixMode(MatrixMode.Projection);
             GL.LoadIdentity();
@@ -54,9 +58,12 @@ namespace project1_frames
             GL.MatrixMode(MatrixMode.Modelview);
             GL.LoadIdentity();
 
+            //save the default modelview matrix
+            GL.PushMatrix();
+
             //check for errors
             ErrorCode error = GL.GetError();
-            if(error != ErrorCode.NoError)
+            if (error != ErrorCode.NoError)
             {
                 System.Console.WriteLine("Error initializing OpenTK, error: " + error.ToString());
                 return false;
@@ -64,12 +71,12 @@ namespace project1_frames
             return true;
         }
 
-        protected void LoadResources( object sender, EventArgs e)
+        protected void LoadResources(object sender, EventArgs e)
         {
             game.VSync = VSyncMode.On;
         }
 
-        protected void Resize(object sender, EventArgs e )
+        protected void Resize(object sender, EventArgs e)
         {
             SCREEN_WIDTH = game.Width;
             SCREEN_HEIGHT = game.Height;
@@ -79,7 +86,7 @@ namespace project1_frames
         //user input
         protected void Input(object sender, KeyboardKeyEventArgs e)
         {
-            if(e.Key == Key.Escape)
+            if (e.Key == Key.Escape)
             {
                 game.Exit();
             }
@@ -89,6 +96,7 @@ namespace project1_frames
         protected void Render(object sender, FrameEventArgs e)
         {
             //set clear colour to black
+            GL.Viewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
             GL.ClearColor(0.0f, 0.0f, 0.0f, 1.0f);
             //clear the screen
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
@@ -96,35 +104,16 @@ namespace project1_frames
             GL.LoadIdentity();
             GL.Translate(SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f, 0.0f);
             GL.Begin(PrimitiveType.Quads);
-                GL.Color3(Color.SpringGreen);
-                GL.Vertex2(-50.0f, -50.0f);
-                GL.Color3(Color.MidnightBlue);
-                GL.Vertex2(-50.0f, 50.0f);
-                GL.Color3(Color.Ivory);
-                GL.Vertex2(50.0f, 50.0f);
-                GL.Color3(Color.Red);
-                GL.Vertex2(50.0f, -50.0f);
-            GL.End();
-            
-
-            /*
-            //start the shader?
-            GL.Begin(PrimitiveType.Triangles);
-
             GL.Color3(Color.MidnightBlue);
-            GL.Vertex3(0.0f, 1.0f, 0.0f);
-            GL.Color3(Color.SpringGreen);
-            GL.Vertex3(0.0f, 0.0f, 0.0f);
-            GL.Color3(Color.Ivory);
-            GL.Vertex3(1.0f, 0.0f, 0.0f);
-
-            //end the shader?
+            GL.Vertex2(-50.0f, -50.0f);
+            GL.Vertex2(-50.0f, 50.0f);
+            GL.Vertex2(50.0f, 50.0f);
+            GL.Vertex2(50.0f, -50.0f);
             GL.End();
-            */
 
             //swap Display memory with virtual memory
             game.SwapBuffers();
-            
+
         }
 
 
@@ -133,4 +122,5 @@ namespace project1_frames
             game.Dispose();
         }
     }
+
 }

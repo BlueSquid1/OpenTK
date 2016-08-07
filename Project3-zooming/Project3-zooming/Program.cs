@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace project1_frames
+namespace Project3_zooming
 {
     class Program
     {
@@ -14,7 +14,7 @@ namespace project1_frames
             using (var game = new Game())
             {
                 bool status = game.InitGL();
-                if( status == false )
+                if (status == false)
                 {
                     return;
                 }
