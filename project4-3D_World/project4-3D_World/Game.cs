@@ -9,14 +9,10 @@ using OpenTK.Input; //for keyboard input
 using OpenTK.Graphics.OpenGL; //for rendering
 using System.Drawing; //for colours
 
-
-namespace Project3_zooming
+namespace project4_3D_World
 {
     public class Game : IDisposable
     {
-        protected int SCREEN_WIDTH = 800;
-        protected int SCREEN_HEIGHT = 600;
-
         protected float gCameraY = 0;
         protected float gCameraX = 0;
 
@@ -26,8 +22,8 @@ namespace Project3_zooming
         public Game()
         {
             game = new GameWindow(
-                SCREEN_WIDTH, //Width
-                SCREEN_HEIGHT, //Height
+                800, //Width
+                600, //Height
                 new OpenTK.Graphics.GraphicsMode(32, 24, 0, 4), //GraphicsMode
                 "First Game" //Title
                 );
@@ -53,20 +49,25 @@ namespace Project3_zooming
             gCameraX = 0;
 
             //setup viewport
-            GL.Viewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+            GL.Viewport(0, 0, game.Width, game.Height);
 
-            //initalize projection matrix
+            /*
             GL.MatrixMode(MatrixMode.Projection);
             GL.LoadIdentity();
-            GL.Ortho(0.0, SCREEN_WIDTH, SCREEN_HEIGHT, 0.0, 1.0, -1.0);
+            GL.Ortho(0.0, game.Width, game.Height, 0.0, 1.0, -1.0);
+            */
+            
+            //initalize projection matrix with perspective
+            float aspect_ratio = (float)game.Width / (float)game.Height;
+            Matrix4 perspective = Matrix4.CreatePerspectiveFieldOfView(MathHelper.PiOver4, aspect_ratio, 0.1f, 100f);
+            GL.MatrixMode(MatrixMode.Projection);
+            GL.LoadMatrix(ref perspective);
+            
 
             //initalize Modelview matrix
             //use modeview instead of projection
             GL.MatrixMode(MatrixMode.Modelview);
             GL.LoadIdentity();
-
-            //save the default modelview matrix
-            GL.PushMatrix();
 
             //check for errors
             ErrorCode error = GL.GetError();
@@ -85,8 +86,6 @@ namespace Project3_zooming
 
         protected void Resize(object sender, EventArgs e)
         {
-            SCREEN_WIDTH = game.Width;
-            SCREEN_HEIGHT = game.Height;
             OpenTK.Graphics.OpenGL.GL.Viewport(0, 0, game.Width, game.Height);
         }
 
@@ -97,47 +96,24 @@ namespace Project3_zooming
             {
                 game.Exit();
             }
-            else if ( e.Key == Key.Up )
-            {
-                gCameraY -= 16.0f;
-            }
-            else if (e.Key == Key.Down)
-            {
-                gCameraY += 16.0f;
-            } else if (e.Key == Key.Left)
-            {
-                gCameraX -= 16.0f;
-            }
-            else if (e.Key == Key.Right)
-            {
-                gCameraX += 16.0f;
-            }
-
-            //update the modelview matrix
-            GL.MatrixMode(MatrixMode.Modelview);
-            GL.PopMatrix();
-            GL.LoadIdentity();
-
-            GL.Translate(-gCameraX, -gCameraY, 0.0f);
-            GL.PushMatrix();
         }
 
         //update display
         protected void Render(object sender, FrameEventArgs e)
         {
             //set clear colour to black
-            GL.Viewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+            GL.Viewport(0, 0, game.Width, game.Height);
             GL.ClearColor(0.0f, 0.0f, 0.0f, 1.0f);
             //clear the screen
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
+            Matrix4 lookat = Matrix4.LookAt(new OpenTK.Vector3(10, 20, 30), OpenTK.Vector3.Zero, OpenTK.Vector3.UnitY);
+            Matrix4 modelLookAt = Convert(body.MotionState.WorldTransform) * lookat;
             GL.MatrixMode(MatrixMode.Modelview);
-            GL.PopMatrix();
-            //save default matrix again
-            GL.PushMatrix();
 
-
-            GL.Translate(SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f, 0.0f);
+            /*
+            GL.LoadIdentity();
+            GL.Translate(game.Width / 2.0f, game.Height / 2.0f, 0.0f);
             GL.Begin(PrimitiveType.Quads);
             GL.Color3(Color.MidnightBlue);
             GL.Vertex2(-50.0f, -50.0f);
@@ -145,7 +121,7 @@ namespace Project3_zooming
             GL.Vertex2(50.0f, 50.0f);
             GL.Vertex2(50.0f, -50.0f);
             GL.End();
-
+            */
             //swap Display memory with virtual memory
             game.SwapBuffers();
 
